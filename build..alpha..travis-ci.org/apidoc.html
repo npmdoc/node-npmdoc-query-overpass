@@ -1,0 +1,153 @@
+<div class="apidocDiv">
+<style>
+/*csslint
+*/
+.apidocDiv {
+    background: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.apidocDiv a[href] {
+    color: #33f;
+    font-weight: bold;
+    text-decoration: none;
+}
+.apidocDiv a[href]:hover {
+    text-decoration: underline;
+}
+.apidocCodeCommentSpan {
+    background: #bbf;
+    color: #000;
+    display: block;
+}
+.apidocCodeKeywordSpan {
+    color: #d00;
+    font-weight: bold;
+}
+.apidocCodePre {
+    background: #eef;
+    border: 1px solid;
+    color: #777;
+    padding: 5px;
+    white-space: pre-wrap;
+}
+.apidocFooterDiv {
+    margin-top: 20px;
+    text-align: center;
+}
+.apidocModuleLi {
+    margin-top: 10px;
+}
+.apidocSectionDiv {
+    border-top: 1px solid;
+    margin-top: 20px;
+}
+.apidocSignatureSpan {
+    color: #777;
+    font-weight: bold;
+}
+</style>
+<h1>api documentation for
+    <a
+
+    >query-overpass (v1.4.0)</a>
+</h1>
+<h4>Make queries to OpenStreetMap's overpass API and output as GeoJSON</h4>
+<div class="apidocSectionDiv"><a
+    href="#apidoc.tableOfContents"
+    id="apidoc.tableOfContents"
+><h1>table of contents</h1></a><ol>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.query-overpass">module query-overpass</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.query-overpass.query-overpass">
+            function <span class="apidocSignatureSpan"></span>query-overpass
+            <span class="apidocSignatureSpan">(query, cb, options)</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+</ol></div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.query-overpass" id="apidoc.module.query-overpass">module query-overpass</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.query-overpass.query-overpass" id="apidoc.element.query-overpass.query-overpass">
+        function <span class="apidocSignatureSpan"></span>query-overpass
+        <span class="apidocSignatureSpan">(query, cb, options)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">query-overpass = function (query, cb, options) {
+    options = options || {};
+
+    var handleJson = function(data) {
+        var geojson;
+
+        geojson = osmtogeojson(data, {
+            flatProperties: options.flatProperties || false
+        });
+        cb(undefined, geojson);
+    };
+
+    var reqOptions = {
+        headers: {
+            &#x27;content-type&#x27;: &#x27;application/x-www-form-urlencoded&#x27;
+        },
+        body: querystring.stringify({ data: query })
+    };
+    var r = request.post(options.overpassUrl || &#x27;http://overpass-api.de/api/interpreter&#x27;, reqOptions);
+
+    r
+        .on(&#x27;response&#x27;, function(response) {
+            if (response.statusCode != 200) {
+                r.abort();
+                return cb({
+                    message: &#x27;Request failed: HTTP &#x27; + response.statusCode,
+                    statusCode: response.statusCode
+                });
+            }
+        })
+        .pipe(JSONStream.parse())
+        .on(&#x27;data&#x27;, handleJson)
+        .on(&#x27;error&#x27;, cb);
+    // var r = request.post(options.overpassUrl || &#x27;http://overpass-api.de/api/interpreter&#x27;, reqOptions)
+    //     .on(&#x27;response&#x27;, function (response) {
+    //         if (response.statusCode === 200) {
+    //             var contentLength = response.headers[&#x27;content-length&#x27;];
+    //             if (!contentLength || contentLength &#x3e;= 256 * 1024) {
+    //                 r.pipe(JSONStream.parse())
+    //                     .on(&#x27;root&#x27;, handleJson);
+    //             } else {
+    //                 r.pipe(concat(function(body) {
+    //                     handleJson(JSON.parse(body));
+    //                 }));
+    //             }
+    //         } else {
+    //             cb({
+    //                 message: &#x27;Request failed: HTTP &#x27; + response.statusCode,
+    //                 statusCode: response.statusCode
+    //             });
+    //         }
+    //     })
+    //     .on(&#x27;error&#x27;, cb);
+
+    return r;
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocFooterDiv">
+    [ this document was created with
+    <a href="https://github.com/kaizhu256/node-utility2" target="_blank">utility2</a>
+    ]
+</div>
+</div>
